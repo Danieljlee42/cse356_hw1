@@ -1,0 +1,39 @@
+---
+- name: automating cse356 hw0
+  hosts: hw1
+  become: yes
+
+  tasks:
+  - name: install nginx
+    apt: 
+      name: nginx
+      state: latest
+      update_cache: yes
+  
+  - name: install git
+    apt:
+      name: git
+      state: latest
+      update_cache: yes
+
+  - name: clean the directory /var/www/html
+    ansible.builtin.file:
+      path: /var/www/html/
+      state: absent
+
+  - name: insert files from git to /var/www/html
+    ansible.builtin.git:
+      repo: https://github.com/Danieljlee42/cse356_hw1.git
+      dest: /var/www/html/
+
+  - name: update nginx configuration file
+    ansible.builtin.lineinfile:
+      path: "/etc/nginx/sites-available/default"
+      regexp: "index index.html index.htm index.nginx-debian.html;"
+      line: "index hw0.html index.html index.htm;"
+      backrefs: yes
+
+  - name: Restart Nginx
+    service:
+      name: nginx
+      state: restarted
